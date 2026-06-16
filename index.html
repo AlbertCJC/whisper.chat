@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' ws: wss:;">
+  <title>Whisper — Anonymous Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dark">
+
+  <!-- Screen reader announcer -->
+  <div id="srAnnouncer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ═══ AMBIENT BACKGROUND ORBS ═══ -->
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="bg-orb bg-orb--1"></div>
+    <div class="bg-orb bg-orb--2"></div>
+    <div class="bg-orb bg-orb--3"></div>
+  </div>
+
+  <!-- ═══ RULES MODAL ═══ -->
+  <div class="modal-overlay hidden" id="rulesModal" role="dialog" aria-modal="true" aria-label="Chat guidelines">
+    <div class="modal glass">
+      <svg class="modal-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1" opacity="0.15"/>
+        <circle cx="24" cy="24" r="14" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+        <circle cx="24" cy="24" r="8" fill="currentColor" opacity="0.4"/>
+      </svg>
+      <h2>Before you start...</h2>
+      <ul class="rules-list">
+        <li>Be kind and respectful to everyone.</li>
+        <li>No harassment, hate speech, or threats.</li>
+        <li>No spam, bots, or automated messages.</li>
+        <li>Keep it appropriate — no explicit content.</li>
+        <li>You can report inappropriate behavior at any time.</li>
+      </ul>
+      <button class="btn btn-primary" id="rulesAcceptBtn">I Understand</button>
+    </div>
+  </div>
+
+  <!-- ═══ HEADER ═══ -->
+  <header class="header glass">
+    <div class="header-brand">
+      <svg class="logo-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+        <circle cx="16" cy="16" r="10" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="16" cy="16" r="6" fill="currentColor" opacity="0.7"/>
+      </svg>
+      <h1>whisper</h1>
+    </div>
+    <div class="header-actions">
+      <span class="online-badge glass" title="Online now">
+        <span class="online-dot"></span>
+        <span id="onlineCount">0</span>
+        <span class="online-label">online</span>
+      </span>
+      <span id="connectionDot" class="connection-dot connected" aria-label="Connected"></span>
+      <button class="theme-toggle glass" id="themeToggle" title="Toggle theme" aria-label="Toggle light mode">
+        <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="main">
+
+    <!-- ── Landing View ── -->
+    <section class="view" id="landingView">
+      <div class="landing-card glass">
+        <svg class="landing-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1" opacity="0.15"/>
+          <circle cx="24" cy="24" r="14" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+          <circle cx="24" cy="24" r="8" fill="currentColor" opacity="0.4"/>
+        </svg>
+        <h2>Talk to strangers anonymously</h2>
+        <p class="landing-tagline">You're one click away from an interesting conversation. No accounts, no history.</p>
+
+        <div class="landing-options">
+          <!-- Nickname -->
+          <div class="nickname-section">
+            <label for="nicknameInput" class="field-label">Your nickname</label>
+            <input
+              type="text"
+              id="nicknameInput"
+              class="glass-input"
+              placeholder="Optional — strangers will see this"
+              maxlength="30"
+              autocomplete="off"
+            >
+          </div>
+
+          <!-- Language selection -->
+          <div class="language-section">
+            <label for="languageSelect" class="field-label">Language</label>
+            <select id="languageSelect" class="language-select glass">
+              <option value="">Any language</option>
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+              <option value="pt">Português</option>
+              <option value="ru">Русский</option>
+              <option value="ja">日本語</option>
+              <option value="ko">한국어</option>
+              <option value="zh">中文</option>
+              <option value="ar">العربية</option>
+              <option value="hi">हिन्दी</option>
+              <option value="it">Italiano</option>
+              <option value="nl">Nederlands</option>
+              <option value="pl">Polski</option>
+              <option value="tr">Türkçe</option>
+            </select>
+          </div>
+
+          <!-- Interests -->
+          <div class="interests-section">
+            <label for="interestsInput" class="field-label">What do you want to talk about?</label>
+            <div class="interests-input-wrap glass" id="interestsWrap">
+              <div class="interests-chips" id="interestsChips"></div>
+              <input
+                type="text"
+                id="interestsInput"
+                class="interests-input"
+                placeholder="Add interests (press Enter)"
+                autocomplete="off"
+              >
+            </div>
+            <p class="interests-hint">Match with people who share your interests, or leave empty for a random chat.</p>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-start" id="startBtn">
+          <svg class="btn-svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+          Start Chatting
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Searching View ── -->
+    <section class="view hidden" id="searchingView">
+      <div class="searching-card glass">
+        <div class="searching-rings animating">
+          <div class="ring ring-outer"></div>
+          <div class="ring ring-middle"></div>
+          <div class="ring ring-inner"></div>
+          <div class="ring-core"></div>
+        </div>
+        <h2>Looking for someone...</h2>
+        <p class="searching-interests" id="searchingInterests"></p>
+        <button class="btn btn-outline" id="cancelSearchBtn">Cancel</button>
+      </div>
+    </section>
+
+    <!-- ── Chat View ── -->
+    <section class="view hidden" id="chatView">
+      <div class="chat-header glass">
+        <div class="chat-header-left">
+          <div class="chat-partner-info">
+            <span class="partner-dot"></span>
+            <span id="chatPartnerLabel">Chatting with a stranger</span>
+          </div>
+          <span class="stranger-counter hidden" id="strangerCounter">Stranger #1</span>
+        </div>
+        <div class="chat-header-right">
+          <div class="shared-interests" id="sharedInterests"></div>
+          <button class="btn-icon-only btn-report" id="reportBtn" title="Report user" aria-label="Report inappropriate behavior">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          </button>
+          <button class="btn-icon-only btn-copy" id="copyChatBtn" title="Copy chat" aria-label="Copy chat transcript">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Seen indicator -->
+      <div class="seen-indicator hidden" id="seenIndicator">✓ Seen</div>
+
+      <div class="chat-messages glass" id="chatMessages">
+        <div class="chat-empty">
+          <svg class="chat-empty-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1" opacity="0.12"/>
+            <circle cx="24" cy="24" r="14" stroke="currentColor" stroke-width="1" opacity="0.2"/>
+            <circle cx="24" cy="24" r="8" fill="currentColor" opacity="0.3"/>
+          </svg>
+          <p>You're connected. Say hello!</p>
+        </div>
+      </div>
+
+      <!-- Topic prompt -->
+      <div class="topic-prompt hidden" id="topicPrompt">
+        <span class="topic-label">Try asking:</span>
+        <span class="topic-text" id="topicText"></span>
+        <button class="topic-dismiss" id="topicDismiss" aria-label="Dismiss">&times;</button>
+      </div>
+
+      <!-- Auto-reconnect prompt (shown after partner disconnects) -->
+      <div class="reconnect-prompt glass hidden" id="reconnectPrompt">
+        <p>Stranger disconnected.</p>
+        <div class="reconnect-buttons">
+          <button class="btn btn-primary btn-sm" id="reconnectBtn">Find someone else</button>
+          <button class="btn btn-outline btn-sm" id="reconnectHomeBtn">Back to home</button>
+        </div>
+      </div>
+
+      <div class="typing-indicator glass hidden" id="typingIndicator">
+        <span class="typing-dots"><span></span><span></span><span></span></span>
+        <span>Stranger is typing...</span>
+      </div>
+
+      <div class="chat-input-area glass">
+        <button class="btn-icon-only emoji-btn" id="emojiBtn" title="Emoji" aria-label="Open emoji picker">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        </button>
+        <div class="emoji-picker glass hidden" id="emojiPicker"></div>
+        <textarea
+          id="messageInput"
+          class="message-input"
+          placeholder="Type a message..."
+          rows="1"
+          maxlength="2000"
+        ></textarea>
+        <button class="btn-icon-only send-btn" id="sendBtn" title="Send message" aria-label="Send message">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+
+      <div class="input-hint" id="inputHint">
+        <kbd>Enter</kbd> to send &nbsp;·&nbsp; <kbd>Shift</kbd>+<kbd>Enter</kbd> for new line
+      </div>
+
+      <div class="chat-actions">
+        <button class="btn btn-outline btn-next" id="nextBtn">
+          <svg class="btn-svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 15.707a1 1 0 010-1.414L14.586 10l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"/><path fill-rule="evenodd" d="M4.293 15.707a1 1 0 010-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+          Next
+        </button>
+      </div>
+
+      <!-- Offline overlay -->
+      <div id="offlineOverlay" class="offline-overlay hidden">
+        <div class="offline-spinner"></div>
+        <p>Connection lost. Reconnecting...</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══ TOAST ═══ -->
+  <div class="toast glass hidden" id="toast"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
