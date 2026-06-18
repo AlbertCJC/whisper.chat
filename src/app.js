@@ -274,8 +274,8 @@ function wireSocketEvents(socket) {
     announceToScreenReader('Connection lost. Reconnecting...');
   }, 'socket-disconnect'));
 
-  socket.on('stranger-count', safeHandler((count) => {
-    onlineCount.textContent = count;
+  socket.on('stranger-count', safeHandler((data) => {
+    onlineCount.textContent = data.count;
   }, 'stranger-count'));
 
   socket.on('searching', safeHandler(() => {
