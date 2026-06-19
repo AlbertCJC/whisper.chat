@@ -10,4 +10,10 @@ export const state = {
   idleWarningShown: false,
   myNickname: '',
   strangerNickname: 'Stranger',
+  // Message config from Supabase
+  message: '',
+  displayStart: '',
+  displayEnd: '',
+  adsenseClientId: '',
+  adsenseSlot: '',
 };

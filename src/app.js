@@ -13,6 +13,101 @@ import {
   $, escapeHtml, showToast, playSound, scrollToBottom, announceToScreenReader,
 } from './utils.js';
 
+// Fetch message config from Supabase
+async function fetchMessageConfig() {
+  try {
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/app_config?id=eq.1&select=*`;
+    const response = await fetch(url, {
+      headers: {
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+      }
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch config: ${response.status}`);
+    }
+    const data = await response.json();
+    if (data && Array.isArray(data) && data.length > 0) {
+      const config = data[0];
+      state.message = config.message ?? '';
+      state.displayStart = config.display_start ?? '';
+      state.displayEnd = config.display_end ?? '';
+      state.adsenseClientId = config.adsense_client_id ?? '';
+      state.adsenseSlot = config.adsense_slot ?? '';
+    } else {
+      // No config found, set defaults
+      state.message = 'Put your message here';
+      state.displayStart = '1970-01-01T00:00:00Z'; // past
+      state.displayEnd = '9999-12-31T23:59:59Z'; // far future
+      state.adsenseClientId = '';
+      state.adsenseSlot = '';
+    }
+  } catch (err) {
+    console.error('[Supabase] Error fetching message config:', err);
+    // Set defaults on error
+    state.message = 'Put your message here';
+    state.displayStart = '1970-01-01T00:00:00Z';
+    state.displayEnd = '9999-12-31T23:59:59Z';
+    state.adsenseClientId = '';
+    state.adsenseSlot = '';
+  }
+}
+
+// Function to determine if we should show the message based on time
+function shouldShowMessage() {
+  if (!state.message || state.message === 'Put your message here') {
+    return false;
+  }
+  const now = new Date();
+  const start = new Date(state.displayStart);
+  const end = new Date(state.displayEnd);
+  return now >= start && now <= end;
+}
+
+// Render the message banner based on config and time
+function renderMessageBanner() {
+  const banner = document.getElementById('messageBanner');
+  if (!banner) return;
+  if (shouldShowMessage()) {
+    // Escape the message to prevent XSS
+    banner.textContent = state.message;
+    banner.classList.remove('hidden');
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+// Set up chat view layout for ads sidebar
+function setupChatLayout() {
+  const sidebar = document.getElementById('adsSidebar');
+  if (sidebar && chatView) {
+    // Ensure chatView is flex layout for sidebar
+    chatView.style.display = 'flex';
+    chatView.style.gap = '1rem';
+    chatView.style.alignItems = 'flex-start';
+  }
+}
+
+// Render ads in sidebar based on state
+function renderAdsSidebar() {
+  const sidebar = document.getElementById('adsSidebar');
+  if (!sidebar) return;
+  // Clear existing content
+  sidebar.innerHTML = '';
+  if (state.adsenseClientId && state.adsenseSlot) {
+    const ins = document.createElement('ins');
+    ins.className = 'adsbygoogle';
+    ins.style.display = 'block';
+    ins.setAttribute('data-ad-client', state.adsenseClientId);
+    ins.setAttribute('data-ad-slot', state.adsenseSlot);
+    ins.setAttribute('data-ad-format', 'auto');
+    ins.setAttribute('data-full-width-responsive', 'true');
+    sidebar.appendChild(ins);
+    // Trigger AdSense to load the ad
+    (window.adsbygoogle = window.adsbygoogle || []).push({});
+  }
+}
+
 // ── DOM Refs (queried on init) ──────────────────────────────────
 let landingView, searchingView, chatView;
 let onlineCount, themeToggle;
@@ -68,12 +163,22 @@ function setView(view) {
 }
 
 // Force CSS animations to restart after display:none removes them
+/*
 function restartRings() {
   const container = searchingView.querySelector('.searching-rings');
   if (container) {
     container.classList.remove('animating');
     void container.offsetHeight; // force reflow
     container.classList.add('animating');
+  }
+}
+*/
+function restartRings() {
+  const container = searchingView.querySelector('.searching-rings');
+  if (container) {
+    container.style.animationPlayState = 'paused';
+    void container.offsetHeight; // force reflow
+    container.style.animationPlayState = 'running';
   }
 }
 
@@ -549,7 +654,7 @@ function wireDomEvents(socket) {
 }
 
 // ── Init ───────────────────────────────────────────────────────
-export function init() {
+export async function init() {
   // Query all DOM refs
   landingView = $('#landingView');
   searchingView = $('#searchingView');
@@ -587,6 +692,14 @@ export function init() {
   nicknameInput = $('#nicknameInput');
   offlineOverlay = $('#offlineOverlay');
   connectionDot = $('#connectionDot');
+
+  // Set up chat layout for ads sidebar
+  setupChatLayout();
+
+// Fetch and render message config
+  await fetchMessageConfig();
+  renderMessageBanner();
+  renderAdsSidebar();
 
   // Theme
   const saved = localStorage.getItem('whisper-theme') || 'dark';

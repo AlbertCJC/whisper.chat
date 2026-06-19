@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' ws: wss:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://pagead2.googlesyndication.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' ws: wss:;">
   <title>Whisper — Anonymous Chat</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3503705183125334" crossorigin="anonymous"></script>
 </head>
 <body class="dark">
 
@@ -67,6 +69,8 @@
 
   <!-- ═══ MAIN CONTENT ═══ -->
   <main class="main">
+    <!-- Message banner -->
+    <div id="messageBanner" class="message-banner glass hidden"></div>
 
     <!-- ── Landing View ── -->
     <section class="view" id="landingView">
@@ -133,118 +137,121 @@
           </div>
         </div>
 
-        <button class="btn btn-primary btn-start" id="startBtn">
-          <svg class="btn-svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
-          Start Chatting
+    <button class="btn btn-primary btn-start" id="startBtn">
+      <svg class="btn-svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+      Start Chatting
+    </button>
+  </div>
+</section>
+
+<!-- ── Searching View ── -->
+<section class="view hidden" id="searchingView">
+  <div class="searching-card glass">
+    <div class="searching-rings animating">
+      <div class="ring ring-outer"></div>
+      <div class="ring ring-middle"></div>
+      <div class="ring ring-inner"></div>
+      <div class="ring-core"></div>
+    </div>
+    <h2>Looking for someone...</h2>
+    <p class="searching-interests" id="searchingInterests"></p>
+    <button class="btn btn-outline" id="cancelSearchBtn">Cancel</button>
+  </div>
+</section>
+
+<!-- ── Chat View ── -->
+<section class="view hidden" id="chatView">
+  <div class="chat-content">
+    <div class="chat-header glass">
+      <div class="chat-header-left">
+        <div class="chat-partner-info">
+          <span class="partner-dot"></span>
+          <span id="chatPartnerLabel">Chatting with a stranger</span>
+        </div>
+        <span class="stranger-counter hidden" id="strangerCounter">Stranger #1</span>
+      </div>
+      <div class="chat-header-right">
+        <div class="shared-interests" id="sharedInterests"></div>
+        <button class="btn-icon-only btn-report" id="reportBtn" title="Report user" aria-label="Report inappropriate behavior">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        </button>
+        <button class="btn-icon-only btn-copy" id="copyChatBtn" title="Copy chat" aria-label="Copy chat transcript">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1 2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"/></svg>
         </button>
       </div>
-    </section>
+    </div>
 
-    <!-- ── Searching View ── -->
-    <section class="view hidden" id="searchingView">
-      <div class="searching-card glass">
-        <div class="searching-rings animating">
-          <div class="ring ring-outer"></div>
-          <div class="ring ring-middle"></div>
-          <div class="ring ring-inner"></div>
-          <div class="ring-core"></div>
-        </div>
-        <h2>Looking for someone...</h2>
-        <p class="searching-interests" id="searchingInterests"></p>
-        <button class="btn btn-outline" id="cancelSearchBtn">Cancel</button>
+    <!-- Seen indicator -->
+    <div class="seen-indicator hidden" id="seenIndicator">✓ Seen</div>
+
+    <div class="chat-messages glass" id="chatMessages">
+      <div class="chat-empty">
+        <svg class="chat-empty-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1" opacity="0.12"/>
+          <circle cx="24" cy="24" r="14" stroke="currentColor" stroke-width="1" opacity="0.2"/>
+          <circle cx="24" cy="24" r="8" fill="currentColor" opacity="0.3"/>
+        </svg>
+        <p>You're connected. Say hello!</p>
       </div>
-    </section>
+    </div>
 
-    <!-- ── Chat View ── -->
-    <section class="view hidden" id="chatView">
-      <div class="chat-header glass">
-        <div class="chat-header-left">
-          <div class="chat-partner-info">
-            <span class="partner-dot"></span>
-            <span id="chatPartnerLabel">Chatting with a stranger</span>
-          </div>
-          <span class="stranger-counter hidden" id="strangerCounter">Stranger #1</span>
-        </div>
-        <div class="chat-header-right">
-          <div class="shared-interests" id="sharedInterests"></div>
-          <button class="btn-icon-only btn-report" id="reportBtn" title="Report user" aria-label="Report inappropriate behavior">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-          </button>
-          <button class="btn-icon-only btn-copy" id="copyChatBtn" title="Copy chat" aria-label="Copy chat transcript">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          </button>
-        </div>
+    <!-- Topic prompt -->
+    <div class="topic-prompt hidden" id="topicPrompt">
+      <span class="topic-label">Try asking:</span>
+      <span class="topic-text" id="topicText"></span>
+      <button class="topic-dismiss" id="topicDismiss" aria-label="Dismiss">&times;</button>
+    </div>
+
+    <!-- Auto-reconnect prompt (shown after partner disconnects) -->
+    <div class="reconnect-prompt glass hidden" id="reconnectPrompt">
+      <p>Stranger disconnected.</p>
+      <div class="reconnect-buttons">
+        <button class="btn btn-primary btn-sm" id="reconnectBtn">Find someone else</button>
+        <button class="btn btn-outline btn-sm" id="reconnectHomeBtn">Back to home</button>
       </div>
+    </div>
 
-      <!-- Seen indicator -->
-      <div class="seen-indicator hidden" id="seenIndicator">✓ Seen</div>
+    <div class="typing-indicator glass hidden" id="typingIndicator">
+      <span class="typing-dots"><span></span><span></span><span></span></span>
+      <span>Stranger is typing...</span>
+    </div>
 
-      <div class="chat-messages glass" id="chatMessages">
-        <div class="chat-empty">
-          <svg class="chat-empty-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-            <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1" opacity="0.12"/>
-            <circle cx="24" cy="24" r="14" stroke="currentColor" stroke-width="1" opacity="0.2"/>
-            <circle cx="24" cy="24" r="8" fill="currentColor" opacity="0.3"/>
-          </svg>
-          <p>You're connected. Say hello!</p>
-        </div>
-      </div>
+    <div class="chat-input-area glass">
+      <button class="btn-icon-only emoji-btn" id="emojiBtn" title="Emoji" aria-label="Open emoji picker">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      </button>
+      <div class="emoji-picker glass hidden" id="emojiPicker"></div>
+      <textarea
+        id="messageInput"
+        class="message-input"
+        placeholder="Type a message..."
+        rows="1"
+        maxlength="2000"
+      ></textarea>
+      <button class="btn-icon-only send-btn" id="sendBtn" title="Send message" aria-label="Send message">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
 
-      <!-- Topic prompt -->
-      <div class="topic-prompt hidden" id="topicPrompt">
-        <span class="topic-label">Try asking:</span>
-        <span class="topic-text" id="topicText"></span>
-        <button class="topic-dismiss" id="topicDismiss" aria-label="Dismiss">&times;</button>
-      </div>
+    <div class="input-hint" id="inputHint">
+      <kbd>Enter</kbd> to send &nbsp;·&nbsp; <kbd>Shift</kbd>+<kbd>Enter</kbd> for new line
+    </div>
 
-      <!-- Auto-reconnect prompt (shown after partner disconnects) -->
-      <div class="reconnect-prompt glass hidden" id="reconnectPrompt">
-        <p>Stranger disconnected.</p>
-        <div class="reconnect-buttons">
-          <button class="btn btn-primary btn-sm" id="reconnectBtn">Find someone else</button>
-          <button class="btn btn-outline btn-sm" id="reconnectHomeBtn">Back to home</button>
-        </div>
-      </div>
+    <div class="chat-actions">
+      <button class="btn btn-outline btn-next" id="nextBtn">
+        <svg class="btn-svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 15.707a1 1 0 010-1.414L14.586 10l-4.293-4.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 010 1.414l-5 5a1 1 0 010 1.414l-5 5a1 1 0 010 1.414l-5 5a1 1 0 010 1.414l-5 5a1 1 0 010 1.414l-5 5a1 1 0 010 1.414l-5 5a1 1 0 010 1.414l-5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"/><path fill-rule="evenodd" d="M4.293 15.707a1 1 0 010-1.414L8.586 10 4.293 5.707a1 1 0 010 1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 010 1.414l-5 5a1 1 0 010 1.414l-5 5a1 1 0 010 1.414l-5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+        Next
+      </button>
+    </div>
 
-      <div class="typing-indicator glass hidden" id="typingIndicator">
-        <span class="typing-dots"><span></span><span></span><span></span></span>
-        <span>Stranger is typing...</span>
-      </div>
-
-      <div class="chat-input-area glass">
-        <button class="btn-icon-only emoji-btn" id="emojiBtn" title="Emoji" aria-label="Open emoji picker">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-        </button>
-        <div class="emoji-picker glass hidden" id="emojiPicker"></div>
-        <textarea
-          id="messageInput"
-          class="message-input"
-          placeholder="Type a message..."
-          rows="1"
-          maxlength="2000"
-        ></textarea>
-        <button class="btn-icon-only send-btn" id="sendBtn" title="Send message" aria-label="Send message">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </button>
-      </div>
-
-      <div class="input-hint" id="inputHint">
-        <kbd>Enter</kbd> to send &nbsp;·&nbsp; <kbd>Shift</kbd>+<kbd>Enter</kbd> for new line
-      </div>
-
-      <div class="chat-actions">
-        <button class="btn btn-outline btn-next" id="nextBtn">
-          <svg class="btn-svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 15.707a1 1 0 010-1.414L14.586 10l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"/><path fill-rule="evenodd" d="M4.293 15.707a1 1 0 010-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
-          Next
-        </button>
-      </div>
-
-      <!-- Offline overlay -->
-      <div id="offlineOverlay" class="offline-overlay hidden">
-        <div class="offline-spinner"></div>
-        <p>Connection lost. Reconnecting...</p>
-      </div>
-    </section>
+    <!-- Offline overlay -->
+    <div id="offlineOverlay" class="offline-overlay hidden">
+      <div class="offline-spinner"></div>
+      <p>Connection lost. Reconnecting...</p>
+    </div>
+  </div>
+  <div id="adsSidebar" class="ads-sidebar glass"></div>
+</section>
 
   </main>
 

@@ -5,9 +5,15 @@
 let socket;
 
 export function initSocket() {
-  const serverUrl = import.meta.env.VITE_SERVER_URL || '';
-
-  socket = new WhisperSocket(serverUrl);
+  const primary = import.meta.env.VITE_WS_URL_PRIMARY || '';
+  const secondary = import.meta.env.VITE_WS_URL_SECONDARY || '';
+  let urls = [primary, secondary].filter(Boolean);
+  if (urls.length === 0) {
+    // fallback to VITE_SERVER_URL or current origin
+    const serverUrl = import.meta.env.VITE_SERVER_URL || '';
+    urls = [serverUrl].filter(Boolean);
+  }
+  socket = new WhisperSocket(urls);
   socket.connect();
   return socket;
 }
@@ -18,8 +24,10 @@ export function getSocket() {
 }
 
 class WhisperSocket {
-  constructor(url) {
-    this.url = url;
+  constructor(urls) {
+    // Normalize to array of strings
+    this.urls = Array.isArray(urls) ? urls : [urls];
+    this.currentUrlIndex = 0;
     this.ws = null;
     this.listeners = new Map();       // event → Set<callback>
     this.reconnectAttempts = 0;
@@ -35,16 +43,19 @@ class WhisperSocket {
     this._isClosing = false;
     this._connectError = null;
 
-    // Build WebSocket URL from the server URL
+    // Build WebSocket URL from the current URL in the list
     let wsUrl;
-    if (this.url) {
-      const parsed = new URL(this.url);
+    const currentUrl = this.urls[this.currentUrlIndex];
+    if (currentUrl) {
+      const parsed = new URL(currentUrl);
       wsUrl = (parsed.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + parsed.host;
     } else {
       // Default to current origin
       const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
       wsUrl = protocol + '//' + location.host;
     }
+    // Ensure the Vite dev server proxies the WebSocket connection
+    wsUrl += '/socket.io';
 
     try {
       this.ws = new WebSocket(wsUrl);
@@ -152,6 +163,8 @@ class WhisperSocket {
   _scheduleReconnect() {
     clearTimeout(this.reconnectTimer);
     this.reconnectAttempts++;
+    // Move to next URL for next attempt (cycle through the list)
+    this.currentUrlIndex = (this.currentUrlIndex + 1) % this.urls.length;
     const delay = Math.min(this.reconnectDelay * this.reconnectAttempts, this.reconnectDelayMax);
     this.reconnectTimer = setTimeout(() => {
       this.connect();

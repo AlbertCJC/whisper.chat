@@ -4,4 +4,9 @@ dist/
 *.log
 .DS_Store
 test-results/
+tests/
 session_summary.md
+.env.local
+.env.development
+.env.production
+.env.test

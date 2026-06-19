@@ -10,8 +10,8 @@ import { showToast } from './utils.js';
 const socket = initSocket();
 
 // Bootstrap the app once connected
-socket.on('connect', () => {
-  init();
+socket.on('connect', async () => {
+  await init();
 });
 
 // Handle connection errors gracefully
