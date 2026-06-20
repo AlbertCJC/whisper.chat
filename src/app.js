@@ -64,17 +64,13 @@ function shouldShowMessage() {
   return now >= start && now <= end;
 }
 
-// Render the message banner based on config and time
+// Render the message banner (always visible)
 function renderMessageBanner() {
   const banner = document.getElementById('messageBanner');
   if (!banner) return;
-  if (shouldShowMessage()) {
-    // Escape the message to prevent XSS
-    banner.textContent = state.message;
-    banner.classList.remove('hidden');
-  } else {
-    banner.classList.add('hidden');
-  }
+  // Escape the message to prevent XSS
+  banner.textContent = state.message;
+  banner.classList.remove('hidden');
 }
 
 // SetUp chat view layout for sidebars (handled in CSS)
