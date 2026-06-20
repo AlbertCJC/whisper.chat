@@ -36,7 +36,7 @@ async function fetchMessageConfig() {
       state.adsenseSlot = config.adsense_slot ?? '';
     } else {
       // No config found, set defaults
-      state.message = 'Put your message here';
+      state.message = 'Display your message here';
       state.displayStart = '1970-01-01T00:00:00Z'; // past
       state.displayEnd = '9999-12-31T23:59:59Z'; // far future
       state.adsenseClientId = '';
@@ -45,7 +45,7 @@ async function fetchMessageConfig() {
   } catch (err) {
     console.error('[Supabase] Error fetching message config:', err);
     // Set defaults on error
-    state.message = 'Put your message here';
+    state.message = 'Display your message here';
     state.displayStart = '1970-01-01T00:00:00Z';
     state.displayEnd = '9999-12-31T23:59:59Z';
     state.adsenseClientId = '';
@@ -55,7 +55,7 @@ async function fetchMessageConfig() {
 
 // Function to determine if we should show the message based on time
 function shouldShowMessage() {
-  if (!state.message || state.message === 'Put your message here') {
+  if (!state.message || state.message === 'Display your message here') {
     return false;
   }
   const now = new Date();
@@ -77,15 +77,10 @@ function renderMessageBanner() {
   }
 }
 
-// Set up chat view layout for ads sidebar
+// SetUp chat view layout for sidebars (handled in CSS)
 function setupChatLayout() {
-  const sidebar = document.getElementById('adsSidebar');
-  if (sidebar && chatView) {
-    // Ensure chatView is flex layout for sidebar
-    chatView.style.display = 'flex';
-    chatView.style.gap = '1rem';
-    chatView.style.alignItems = 'flex-start';
-  }
+  // Layout is handled via CSS in #chatView
+  // This function kept for compatibility but does nothing
 }
 
 // Render ads in sidebar based on state
@@ -106,6 +101,29 @@ function renderAdsSidebar() {
     // Trigger AdSense to load the ad
     (window.adsbygoogle = window.adsbygoogle || []).push({});
   }
+}
+
+// Render sponsored content in right sidebar
+function renderRightSidebar() {
+  const sidebar = document.getElementById('rightSidebar');
+  if (!sidebar) return;
+
+  // Clear existing content
+  sidebar.innerHTML = '';
+
+  // Placeholder for sponsored content
+  // In a real implementation, this would fetch sponsored content from an API
+  const sponsoredHTML = `
+    <div class="sponsored-header">
+      <h3>Sponsored</h3>
+    </div>
+    <div class="sponsored-content">
+      <p>This space is reserved for sponsored content</p>
+      <p>Check back soon for featured messages from our partners!</p>
+    </div>
+  `;
+
+  sidebar.innerHTML = sponsoredHTML;
 }
 
 // ── DOM Refs (queried on init) ──────────────────────────────────
@@ -700,6 +718,7 @@ export async function init() {
   await fetchMessageConfig();
   renderMessageBanner();
   renderAdsSidebar();
+  renderRightSidebar();
 
   // Theme
   const saved = localStorage.getItem('whisper-theme') || 'dark';

@@ -1095,18 +1095,71 @@ body.light .language-select option { background: #fff; }
 }
 
 /* ── Ads Sidebar & Chat Layout ───────────────────────────────────── */
+#chatView {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
 .chat-content {
-  flex: 1 1 0%;
+  flex: 0 0 70%;
   display: flex;
   flex-direction: column;
 }
-.ads-sidebar {
-  width: 300px;
-  flex-shrink: 0;
+.ads-sidebar,
+.right-sidebar {
+  flex: 0 0 15%;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+.ads-sidebar {
+  /* Left sidebar - ads */
+}
+.right-sidebar {
+  /* Right sidebar - sponsored content */
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+}
+.sponsored-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--glass-border);
+}
+.sponsored-header h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.sponsored-content {
+  padding: 16px;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+.sponsored-content p {
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+.sponsored-content p:last-child {
+  margin-bottom: 0;
+}
+/* Hide sidebars on narrow screens and stack vertically */
+@media (max-width: 768px) {
+  #chatView {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ads-sidebar,
+  .right-sidebar,
+  .chat-content {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+  /* Optionally hide right sidebar on mobile if not essential */
+  .right-sidebar {
+    display: none;
+  }
 }
 
 /* ── Reduced Motion ─────────────────────────────────────────── */
