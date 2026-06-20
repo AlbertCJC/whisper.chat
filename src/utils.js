@@ -37,7 +37,7 @@ export function showToast(msg) {
 // ── Scroll Helper ─────────────────────────────────────────────
 export function scrollToBottom(container) {
   requestAnimationFrame(() => {
-    container.scrollTop = container.scrollHeight;
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
   });
 }
 

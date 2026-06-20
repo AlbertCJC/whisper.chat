@@ -96,6 +96,17 @@ function renderAdsSidebar() {
     sidebar.appendChild(ins);
     // Trigger AdSense to load the ad
     (window.adsbygoogle = window.adsbygoogle || []).push({});
+    // Fallback if ad fails to load
+    setTimeout(() => {
+      if (!sidebar.querySelector('iframe') && !sidebar.querySelector('ins > iframe')) {
+        sidebar.innerHTML = `
+          <div class="ads-fallback">
+            <p>Advertisement</p>
+            <p>This space is reserved for ads</p>
+          </div>
+        `;
+      }
+    }, 2000);
   }
 }
 
